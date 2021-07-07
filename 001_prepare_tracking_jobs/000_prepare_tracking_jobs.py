@@ -19,6 +19,7 @@ line_bb_off.disable_beambeam()
 tracker = xt.Tracker(sequence=line_bb_off)
 
 def one_turn_map(p):
+    # TODO  To be generalized for ions
     part = xt.Particles(
             p0c = p0c,
             x = p[0],
@@ -46,7 +47,17 @@ part_co_dict = {'p0c': p0c, 'x': res[0], 'px': res[1], 'y': res[2], 'py': res[3]
                 'zeta': res[4], 'delta': res[5]}
 
 particles = xt.Particles(**part_co_dict)
+print('Test closed orbit')
 for _ in range(10):
     print(particles.at_turn[0], particles.x[0], particles.y[0],
           particles.zeta[0])
     tracker.track(particles)
+
+# Find R matrix
+p0 = res.copy()
+II = np.eye(6)
+RR = np.zeros((6, 6), dtype=np.float64)
+for jj,dd in enumerate([1e-9,1e-12,1e-9,1e-12,1e-9,1e-9]):
+    pd=p0+II[jj]*dd
+    RR[:,jj]=(one_turn_map(pd)-p0)/dd
+
