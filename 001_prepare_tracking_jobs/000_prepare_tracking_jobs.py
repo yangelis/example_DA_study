@@ -53,6 +53,7 @@ for _ in range(10):
           particles.zeta[0])
     tracker.track(particles)
 
+
 # Find R matrix
 p0 = res.copy()
 II = np.eye(6)
@@ -244,5 +245,19 @@ XX_norm= np.array([x_norm,
 
 XX = np.dot(W, XX_norm)
 
+particles_matched = xt.Particles(
+        p0c=p0c,
+        x=XX[0, :], px=XX[1, :], y=XX[2, :], py=XX[3, :],
+        zeta=XX[4, :], delta=XX[5, :])
 
 
+import matplotlib.pyplot as plt
+plt.close('all')
+plt.figure(1)
+plt.plot(particles_matched.x, particles_matched.px)
+
+tracker.track(particles_matched, num_turns=10)
+
+plt.plot(particles_matched.x, particles_matched.px)
+
+plt.show()
