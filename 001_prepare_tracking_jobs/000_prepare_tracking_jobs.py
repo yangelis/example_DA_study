@@ -61,3 +61,5 @@ for jj,dd in enumerate([1e-9,1e-12,1e-9,1e-12,1e-9,1e-9]):
     pd=p0+II[jj]*dd
     RR[:,jj]=(one_turn_map(pd)-p0)/dd
 
+print('Eigenvalues:')
+print(np.angle(np.linalg.eigvals(RR))/2/pi)
