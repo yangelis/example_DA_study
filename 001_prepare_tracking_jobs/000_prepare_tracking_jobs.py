@@ -13,10 +13,15 @@ p0c = ddd['p0c_eV']
 line = xl.Line.from_json(
         '../000_machine_model/xline/line_bb_dipole_not_cancelled.json')
 
-line_bb_off = line.copy()
-line_bb_off.disable_beambeam()
+#line_bb_off = line.copy()
+#line_bb_off.disable_beambeam()
 
-tracker = xt.Tracker(sequence=line_bb_off)
+tracker = xt.Tracker(sequence=line)
+
+for ee in tracker.line.elements:
+    if ee.__class__.__name__.startswith('BeamBeam'):
+         ee._temp_q0 = ee.q0
+         ee.q0 = 0 
 
 def one_turn_map(p):
     # TODO  To be generalized for ions

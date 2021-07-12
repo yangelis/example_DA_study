@@ -27,7 +27,7 @@ configuration = {
     #'force_leveling' : {'on_sep8': -0.03425547139366354, 'on_sep2': 0.14471680504084292},
 
     # Optics file
-    'optics_file'              : 'optics_repository/HLLHCV1.4/round/opt_round_150_1500_thin.madx', #15 cm
+    'optics_file'              : 'optics_repository/HLLHCV1.5/round/opt_round_200_1500_thin.madx', #15 cm
 
     # Enable checks
     'check_betas_at_ips'       : True,
@@ -44,22 +44,22 @@ configuration = {
     # Beam parameters
     'beam_norm_emit_x'     : 2.5,          # [um]
     'beam_norm_emit_y'     : 2.5,          # [um]
-    'beam_sigt'            : 0.076,        # [m]
+    'beam_sigt'            : 0.09,        # [m]
     'beam_sige'            : 1.1e-4,       # [-]
-    'beam_npart'           : 2.2e11,       # [-]
+    'beam_npart'           : 1.3e11,       # [-]
     'beam_energy_tot'      : 7000,         # [GeV]
 
     # Tunes and chromaticities
     'qx0'                  : 62.31,
     'qy0'                  : 60.32,
-    'chromaticity_x'       : 5,            # [-] 
-    'chromaticity_y'       : 5,            # [-] 
+    'chromaticity_x'       : 15,            # [-] 
+    'chromaticity_y'       : 15,            # [-] 
 
     # RF voltage
     'vrf_total'            : 16.,          # [MV]
 
     # Octupole current
-    'oct_current'          : -235,         # [A]
+    'oct_current'          : 100,         # [A]
 
     # Luminosity parameters
     'enable_lumi_control'      : True,
@@ -68,9 +68,9 @@ configuration = {
     'lumi_ip8'             : 2e33, # [Hz/cm2] leveled luminosity in IP8 
     'fullsep_in_sigmas_ip2': 5,
     'nco_IP1'              : 2748, # number of Head-On collisions in IP1
-    'nco_IP2'              : 2494, # number of Head-On collisions in IP1
+    'nco_IP2'              : 2492, # number of Head-On collisions in IP1
     'nco_IP5'              : 2748, # number of Head-On collisions in IP1
-    'nco_IP8'              : 2572, # number of Head-On collisions in IP1
+    'nco_IP8'              : 2574, # number of Head-On collisions in IP1
 
     # Beam-beam parameters (used by python tools - NOT by legacy macros)
     'beambeam_config'      :
@@ -93,7 +93,7 @@ configuration = {
     'N_iter_coupling'            : 2,
 
     # Value to be added to linear coupling knobs (on sequence_to_track)
-    'delta_cmr'                 : 0.,
+    'delta_cmr'                 : 1e-3,
     'delta_cmi'                 : 0.,
 
     # Verbose flag for MAD-X parts
@@ -122,11 +122,11 @@ configuration = {
         'on_x1'                   : 250,          # [urad]  
         'on_sep1'                 : 0,            # [mm]   
         'on_x2'                   : -170,         # [urad] 
-        'on_sep2'                 : 0.138,        # [mm]   
+        'on_sep2'                 : 1.,        # [mm]   
         'on_x5'                   : 250,          # [urad] 
         'on_sep5'                 : 0,            # [mm]   
-        'on_x8'                   : -250,         # [urad] 
-        'on_sep8'                 : -0.043,       # [mm]   
+        'on_x8'                   : 170,         # [urad], in V see input.py 
+        'on_sep8'                 : -1,       # [mm]   
         'on_a1'                   : 0,            # [urad] 
         'on_o1'                   : 0,            # [mm]   
         'on_a2'                   : 0,            # [urad] 
@@ -135,6 +135,7 @@ configuration = {
         'on_o5'                   : 0,            # [mm]   
         'on_a8'                   : 0,            # [urad] 
         'on_o8'                   : 0,            # [mm]   
+        'phi_ir8'                 : 90,           # [deg]
         'on_crab1'                : -190,         # [urad] 
         'on_crab5'                : -190,         # [urad]  
 
@@ -151,7 +152,7 @@ configuration = {
         },
 
     # Enable machine imperfections
-    'enable_imperfections'     : True,
+    'enable_imperfections'     : False,
 
     # Enable knob synthesis (for coupling correction, if no imperfections)
     'enable_knob_synthesis'    : True,
@@ -161,18 +162,18 @@ configuration = {
         'par_myseed'               : 1,
         'par_correct_for_D2'       : 0,
         'par_correct_for_MCBX'     : 0,
-        'par_on_errors_LHC'        : 1,
+        'par_on_errors_LHC'        : 0,
         'par_off_errors_Q4_inIP15' : 0, 
         'par_off_errors_Q5_inIP15' : 0,
-        'par_on_errors_MBH'        : 1,
-        'par_on_errors_Q4'         : 1,
-        'par_on_errors_D2'         : 1,
-        'par_on_errors_D1'         : 1,
-        'par_on_errors_IT'         : 1,
+        'par_on_errors_MBH'        : 0,
+        'par_on_errors_Q4'         : 0,
+        'par_on_errors_D2'         : 0,
+        'par_on_errors_D1'         : 0,
+        'par_on_errors_IT'         : 0,
         'par_on_errors_MCBRD'      : 0,
         'par_on_errors_MCBXF'      : 0,
         'par_on_errors_NLC'        : 0,
-        'par_write_errortable'     : 1,
+        'par_write_errortable'     : 0,
         },
 
     # Parameters for legacy beam-beam macros (not used in default modes)
