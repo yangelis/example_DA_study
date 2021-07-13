@@ -3,7 +3,7 @@ import xtrack as xt
 import json
 import help_functions as hf
 
-with open('/home/HPC/sterbini/lhcmask/python_examples/hl_lhc_collisionsEOL_python/xlines/line_bb_for_tracking.json') as fid:
+with open('/home/HPC/sterbini/DA_study_example/000_machine_model/xlines/line_bb_for_tracking.json') as fid:
     dd=json.load(fid)
 
 WW = dd['WW_finite_diffs']

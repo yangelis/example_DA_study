@@ -12,7 +12,7 @@ import numpy as np
 #from config import configuration
 
 with open('config.yaml','r') as fid:
-   configuration = yaml.load(fid)['configuration']
+   configuration = yaml.load(fid)
 
 mode = configuration['mode']
 tol_beta = configuration['tol_beta']
