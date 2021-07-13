@@ -1,0 +1,7 @@
+rm twiss_*
+rm final_*
+rm fc.*
+rm *.log
+rm *json
+rm -r temp __pycache__ xlines
+rm tools tracking_tools optics_toolkit errors beambeam_macros modules optics_repository

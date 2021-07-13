@@ -1,0 +1,28 @@
+---
+# Description of the xline
+xline_json :    '/home/HPC/sterbini/DA_study_example/000_machine_model/xlines/line_bb_for_tracking.json'
+
+# metric
+epsn_1     :    2.5e-6   # normalised emittance x
+epsn_2     :    2.5e-6   # normalised emittance y
+ptau_max   :    0.0      # initial off-momentum
+
+# distribution in the normalized xy space
+r          :             # radii [sigma] in the xy plane
+  - 8.0000
+  - 8.0615
+  - 8.1250
+  - 8.1875 
+  - 8.2500  
+  - 8.3125
+  - 8.3750
+  - 8.4375 
+theta      :             # angles [deg] in the xy plane 
+  - 15                  
+  - 30
+  - 45
+  - 60
+  - 75                  
+
+# tracking
+n_turns    :   1000       # number of turns to track
