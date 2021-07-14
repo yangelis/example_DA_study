@@ -4,6 +4,8 @@ import time
 import pandas as pd
 import xline as xl
 import xtrack as xt
+import sys
+sys.path.append('/home/HPC/sterbini/DA_study_example/templates/001_prepare_tracking_jobs/')
 import help_functions as hf
 
 with open('config.yaml','r') as fid:
@@ -23,12 +25,13 @@ line = xl.Line.from_dict(dd)
 egeom_1 = config['epsn_1'] / p_co.gamma0 / p_co.beta0
 egeom_2 = config['epsn_2'] / p_co.gamma0 / p_co.beta0
 
-init_canonical_6D, A1_A2_in_sigma, number_of_particles = hf.get_particles_distribution(
+particle_df=pd.read_parquet(config['particle_file'])
+
+init_canonical_6D, A1_A2_in_sigma, number_of_particles = hf.from_normal_to_physical_space(
+    particle_df,
     egeom_1=egeom_1,
     egeom_2=egeom_2,
     ptau_max=config['ptau_max'],
-    r_list=config['r'],
-    theta_list=config['theta'],
     W=WW,
     invW=invWW,
 )

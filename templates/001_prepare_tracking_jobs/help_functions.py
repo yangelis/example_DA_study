@@ -2,6 +2,37 @@ import numpy as np
 import xline
 import xtrack
 
+def from_normal_to_physical_space(df, egeom_1, egeom_2, ptau_max, W=None, invW=None):
+
+    init_canonical_6D = np.empty([1, 6])
+    init_canonical_6D[0,0] = 0.
+    init_canonical_6D[0,1] = 0.
+    init_canonical_6D[0,2] = 0.
+    init_canonical_6D[0,3] = 0.
+    init_canonical_6D[0,4] = 0.
+    init_canonical_6D[0,5] = ptau_max
+    init_normalized_6D_temp = np.tensordot(invW, init_canonical_6D, [1,1]).T
+    
+    r_list = df['normalized amplitude in xy-plane'].values 
+    theta_list = df['angle in xy-plane [deg]'].values*np.pi/180 # [rad]
+
+    A1_A2_in_sigma = np.array((r_list*np.cos(theta_list),r_list*np.sin(theta_list)))    
+    n_particles = len(A1_A2_in_sigma[0])
+
+    A1_A2_in_sigma_unrolled = A1_A2_in_sigma.reshape(n_particles, 2)
+
+    init_normalized_6D = np.empty([n_particles, 6])
+    init_normalized_6D[:,0] = A1_A2_in_sigma_unrolled[:,0] * np.sqrt(egeom_1)
+    init_normalized_6D[:,1] = 0.
+    init_normalized_6D[:,2] = A1_A2_in_sigma_unrolled[:,1] * np.sqrt(egeom_2)
+    init_normalized_6D[:,3] = 0.
+    init_normalized_6D[:,4] = 0.
+    init_normalized_6D[:,5] = init_normalized_6D_temp[0,5]
+
+    init_canonical_coordinates = np.tensordot(W, init_normalized_6D, [1,1]).T
+
+    return init_canonical_coordinates, A1_A2_in_sigma, n_particles
+
 
 def get_particles_distribution(egeom_1, egeom_2, ptau_max, r_list, theta_list, W=None, invW=None):
 
