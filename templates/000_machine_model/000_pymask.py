@@ -3,7 +3,7 @@ import sys
 import json
 import yaml
 import numpy as np
-
+import tree_maker
 
 #####################################################
 # Read general configurations and setup envirnoment #
@@ -13,6 +13,8 @@ import numpy as np
 
 with open('config.yaml','r') as fid:
    configuration = yaml.load(fid)
+
+tree_maker.tag_json.tag_it(configuration['log_file'], 'started')
 
 mode = configuration['mode']
 tol_beta = configuration['tol_beta']
@@ -564,3 +566,4 @@ sdf.to_parquet('final_summ_BBON.parquet')
 # N.B. this erases the errors in the mad_track instance
 # pm.save_mad_sequence_and_error(mad_track, sequence_to_track, filename='final')
 
+tree_maker.tag_json.tag_it(configuration['log_file'], 'completed')

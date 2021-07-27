@@ -8,7 +8,10 @@ particle_file:  '/home/HPC/sterbini/DA_study_example/templates/001_prepare_track
 # metric
 epsn_1     :    2.5e-6   # normalised emittance x
 epsn_2     :    2.5e-6   # normalised emittance y
-ptau_max   :    0.0      # initial off-momentum
+ptau_max   :    27.e-5      # initial off-momentum
 
 # tracking
 n_turns    :   1000       # number of turns to track
+
+
+log_file: 'log.json'

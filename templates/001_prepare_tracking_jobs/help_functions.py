@@ -101,7 +101,7 @@ def get_DA_distribution(n_sigma, ptau_max, egeom_1, egeom_2, r_N=1144, theta_N=1
 
     return init_canonical_coordinates, A1_A2_in_sigma, n_particles
 
-def add_to_closed_orbit(init_canonical_6D, partCO):
+def add_to_closed_orbit(init_canonical_6D, partCO, partid=None):
     pp = partCO.copy()
     pp.x += init_canonical_6D[:,0]
     pp.px += init_canonical_6D[:,1]
@@ -109,7 +109,10 @@ def add_to_closed_orbit(init_canonical_6D, partCO):
     pp.py += init_canonical_6D[:,3]
     pp.zeta += init_canonical_6D[:,4]
     pp.delta += init_canonical_6D[:,5]
-    pp.partid = np.arange(len(pp.x), dtype=np.int64)
+    if partid is None:
+         pp.partid = np.arange(len(pp.x), dtype=np.int64)
+    else:
+         pp.partid = np.int64(partid)
     return pp 
 
 def apply_closed_orbit(init_canonical_coordinates, partCO):
