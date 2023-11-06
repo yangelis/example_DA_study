@@ -82,10 +82,12 @@ config_collider:
         c_minus_knob_2: c_minus_im_b2
     
     config_ip15_phases:
-      mux15_b1: -30.9955
-      muy15_b1: -29.9689
-      mux15_b2: -31.0411
-      muy15_b2: -29.9896
+      mux:
+        lhcb1: -30.9955
+        lhcb2: -31.0411
+      muy:
+        lhcb1: -29.9689
+        lhcb2: -29.9896
 
   config_beambeam:
     bunch_spacing_buckets: 10
