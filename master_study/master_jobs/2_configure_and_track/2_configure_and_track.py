@@ -478,7 +478,9 @@ def configure_collider(
     config_ip15_phases = config_collider['config_ip15_phases']
     # Match ip15 phase advance
     collider, _ = match_ip15_phase(
-        collider, config_ip15_phases['mux15_b1'],config_ip15_phases['muy15_b1'])
+        collider,
+        config_ip15_phases['mux']['lhcb1'],
+        config_ip15_phases['muy']['lhcb1'])
 
     # Compute the number of collisions in the different IPs
     (
