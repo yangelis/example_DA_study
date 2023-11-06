@@ -18,6 +18,7 @@ import xmask as xm
 import xmask.lhc as xlhc
 from misc import generate_orbit_correction_setup
 from misc import luminosity_leveling, luminosity_leveling_ip1_5, compute_PU
+from misc import change_ip15_phase
 
 # Initialize yaml reader
 ryaml = ruamel.yaml.YAML()
@@ -126,6 +127,56 @@ def match_tune_and_chroma(collider, conf_knobs_and_tuning, match_linear_coupling
         )
 
     return collider
+
+
+def match_ip15_phase(collider, tar_mux15, tar_muy15, staged_match=True, solve=True):
+    tw0 = collider.twiss()
+    mux_15_orig_b1 = tw0["lhcb1"][:, "ip1"].mux[0] - tw0["lhcb1"][:, "ip5"].mux[0]
+    muy_15_orig_b1 = tw0["lhcb1"][:, "ip1"].muy[0] - tw0["lhcb1"][:, "ip5"].muy[0]
+    mux_15_orig_b2 = tw0["lhcb2"][:, "ip1"].mux[0] - tw0["lhcb2"][:, "ip5"].mux[0]
+    muy_15_orig_b2 = tw0["lhcb2"][:, "ip1"].muy[0] - tw0["lhcb2"][:, "ip5"].muy[0]
+
+    refqxb1 = tw0["lhcb1"].qx
+    refqyb1 = tw0["lhcb1"].qy
+    refqxb2 = tw0["lhcb2"].qx
+    refqyb2 = tw0["lhcb2"].qy
+
+    if mux_15_orig_b1 < 0:
+        mux_15_orig_b1 += refqxb1
+    if muy_15_orig_b1 < 0:
+        muy_15_orig_b1 += refqyb1
+    if mux_15_orig_b2 < 0:
+        mux_15_orig_b2 += refqxb2
+    if muy_15_orig_b2 < 0:
+        muy_15_orig_b2 += refqyb2
+
+    print(f"{mux_15_orig_b1=}")
+    print(f"{muy_15_orig_b1=}")
+    print(f"{mux_15_orig_b2=}")
+    print(f"{muy_15_orig_b2=}")
+
+    d_mux_15_b1 = mux_15_orig_b1 - tar_mux15
+    d_muy_15_b1 = muy_15_orig_b1 - tar_muy15
+    d_mux_15_b2 = mux_15_orig_b2 - tar_mux15
+    d_muy_15_b2 = muy_15_orig_b2 - tar_muy15
+
+    print(f"{tar_mux15=}, {tar_muy15=}")
+    print(f"{d_mux_15_b1=}, {d_muy_15_b1=}")
+    print(f"{d_mux_15_b2=}, {d_muy_15_b2=}")
+
+    opts = change_ip15_phase(
+        collider,
+        dqx=tar_mux15,
+        dqy=tar_muy15,
+        d_mux_15_b1=d_mux_15_b1,
+        d_muy_15_b1=d_muy_15_b1,
+        d_mux_15_b2=d_mux_15_b2,
+        d_muy_15_b2=d_muy_15_b2,
+        staged_match=staged_match,
+        solve=solve,
+    )
+
+    return collider, opts
 
 
 # ==================================================================================================
@@ -423,6 +474,11 @@ def configure_collider(
     collider = match_tune_and_chroma(
         collider, conf_knobs_and_tuning, match_linear_coupling_to_zero=True
     )
+
+    config_ip15_phases = config_collider['config_ip15_phases']
+    # Match ip15 phase advance
+    collider, _ = match_ip15_phase(
+        collider, config_ip15_phases['mux15_b1'],config_ip15_phases['muy15_b1'])
 
     # Compute the number of collisions in the different IPs
     (
