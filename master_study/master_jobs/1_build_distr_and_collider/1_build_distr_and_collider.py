@@ -15,6 +15,9 @@ import numpy as np
 import itertools
 import pandas as pd
 import tree_maker
+import xtrack as xt
+import xtrack._temp.lhc_match as lm
+import xpart as xp
 
 # Import user-defined optics-specific tools
 import optics_specific_tools as ost
@@ -219,8 +222,175 @@ def build_distr_and_collider(config_file="config.yaml"):
 
 
 # ==================================================================================================
+# --- Function to start generation of colliders
+# ==================================================================================================
+def match_ip15_phase(collider, tar_mux15, tar_muy15, staged_match=True, solve=True):
+    tw0 = collider.twiss()
+    mux_15_orig_b1 = tw0["lhcb1"][:, "ip1"].mux[0] - tw0["lhcb1"][:, "ip5"].mux[0]
+    muy_15_orig_b1 = tw0["lhcb1"][:, "ip1"].muy[0] - tw0["lhcb1"][:, "ip5"].muy[0]
+    mux_15_orig_b2 = tw0["lhcb2"][:, "ip1"].mux[0] - tw0["lhcb2"][:, "ip5"].mux[0]
+    muy_15_orig_b2 = tw0["lhcb2"][:, "ip1"].muy[0] - tw0["lhcb2"][:, "ip5"].muy[0]
+
+    refqxb1 = tw0["lhcb1"].qx
+    refqyb1 = tw0["lhcb1"].qy
+    refqxb2 = tw0["lhcb2"].qx
+    refqyb2 = tw0["lhcb2"].qy
+
+    if mux_15_orig_b1 < 0:
+        mux_15_orig_b1 += refqxb1
+    if muy_15_orig_b1 < 0:
+        muy_15_orig_b1 += refqyb1
+    if mux_15_orig_b2 < 0:
+        mux_15_orig_b2 += refqxb2
+    if muy_15_orig_b2 < 0:
+        muy_15_orig_b2 += refqyb2
+
+    print(f"{mux_15_orig_b1=}")
+    print(f"{muy_15_orig_b1=}")
+    print(f"{mux_15_orig_b2=}")
+    print(f"{muy_15_orig_b2=}")
+
+    d_mux_15_b1 = mux_15_orig_b1 - tar_mux15
+    d_muy_15_b1 = muy_15_orig_b1 - tar_muy15
+    d_mux_15_b2 = mux_15_orig_b2 - tar_mux15
+    d_muy_15_b2 = muy_15_orig_b2 - tar_muy15
+
+    print(f"{tar_mux15=}, {tar_muy15=}")
+    print(f"{d_mux_15_b1=}, {d_muy_15_b1=}")
+    print(f"{d_mux_15_b2=}, {d_muy_15_b2=}")
+
+    opts = ost.change_ip15_phase(
+        collider,
+        dqx=tar_mux15,
+        dqy=tar_muy15,
+        d_mux_15_b1=d_mux_15_b1,
+        d_muy_15_b1=d_muy_15_b1,
+        d_mux_15_b2=d_mux_15_b2,
+        d_muy_15_b2=d_muy_15_b2,
+        staged_match=staged_match,
+        solve=solve,
+    )
+
+    return collider, opts
+
+def build_phase_colliders(config_file="config.yaml"):
+    configuration, config_particles, config_mad = load_configuration(config_file)
+
+    muxs = config_mad["config_ip15_phase"]["muxs"]
+    muys = config_mad["config_ip15_phase"]["muys"]
+
+    # Make mad environment
+    xm.make_mad_environment(links=config_mad["links"])
+
+    # Start mad
+    mad_b1b2 = Madx(command_log="mad_collider.log")
+
+    mad_b4 = Madx(command_log="mad_b4.log")
+
+    # Build sequences
+    ost.build_sequence(mad_b1b2, mylhcbeam=1, ignore_cycling=True)
+    ost.build_sequence(mad_b4, mylhcbeam=4, ignore_cycling=True)
+
+    # Apply optics (only for b1b2, b4 will be generated from b1b2)
+    ost.apply_optics(mad_b1b2, optics_file=config_mad["optics_file"])
+    mad_b1b2.use("lhcb1")
+    mad_b1b2.twiss()
+
+    # Apply optics (only for b4, just for check)
+    ost.apply_optics(mad_b4, optics_file=config_mad["optics_file"])
+
+    mad_b4.use("lhcb2")
+    mad_b4.twiss()
+
+    line1 = xt.Line.from_madx_sequence(
+        mad_b1b2.sequence.lhcb1,
+        allow_thick=True,
+        deferred_expressions=True,
+        replace_in_expr={"bv_aux": "bvaux_b1"},
+    )
+
+    line4 = xt.Line.from_madx_sequence(
+        mad_b4.sequence.lhcb2,
+        allow_thick=True,
+        deferred_expressions=True,
+        replace_in_expr={"bv_aux": "bvaux_b2"},
+    )
+
+    # Remove solenoids (cannot backtwiss for now)
+    for ll in [line1, line4]:
+        tt = ll.get_table()
+        for nn in tt.rows[tt.element_type == "Solenoid"].name:
+            ee_elen = ll[nn].length
+            ll.element_dict[nn] = xt.Drift(length=ee_elen)
+
+    collider = xt.Multiline(lines={"lhcb1": line1, "lhcb2": line4})
+    collider.lhcb1.particle_ref = xp.Particles(mass0=xp.PROTON_MASS_EV, p0c=7000e9)
+    collider.lhcb2.particle_ref = xp.Particles(mass0=xp.PROTON_MASS_EV, p0c=7000e9)
+
+    collider.lhcb1.twiss_default["method"] = "4d"
+    collider.lhcb2.twiss_default["method"] = "4d"
+    collider.lhcb2.twiss_default["reverse"] = True
+
+    collider.build_trackers()
+
+    # Save collider to json
+    os.makedirs("collider/collider_with_phase", exist_ok=True)
+
+    for match_job, (tar_mux15, tar_muy15) in enumerate(itertools.product(muxs, muys)):
+        print(f"Building collider {match_job}")
+        collider_p = collider.copy()
+        match_ip15_phase(collider_p, tar_mux15, tar_muy15, staged_match=True, solve=True)
+        # collider_p.to_json(f'collider/collider_with_phase/collider_{tar_mux15:2.3f}_{tar_muy15:2.3f}.json')
+        lm.gen_madx_optics_file_auto(
+            collider_p, f"collider/collider_with_phase/opt_phase_ip15_{tar_mux15:2.3f}_{tar_muy15:2.3f}.madx"
+        )
+
+
+def build_distr_and_colliders(config_file="config.yaml"):
+    configuration, config_particles, config_mad = load_configuration(config_file)
+
+    muxs = config_mad["config_ip15_phase"]["muxs"]
+    muys = config_mad["config_ip15_phase"]["muys"]
+    
+    # Get sanity checks flag
+    # sanity_checks = configuration["sanity_checks"]
+    sanity_checks = False # For now, optics files from xtrack missing some variables (e.g. qxBIM)
+
+    # Tag start of the job
+    tree_maker_tagging(configuration, tag="started")
+
+    # Build particle distribution
+    particle_list = build_particle_distribution(config_particles)
+
+    # Write particle distribution to file
+    write_particle_distribution(particle_list)
+    
+    os.makedirs("collider", exist_ok=True)
+    for match_job, (tar_mux15, tar_muy15) in enumerate(itertools.product(muxs, muys)):
+        optics_file = f"collider/collider_with_phase/opt_phase_ip15_{tar_mux15:2.3f}_{tar_muy15:2.3f}.madx"
+        config_mad["optics_file"] = optics_file
+
+        # Build collider from mad model
+        collider = build_collider_from_mad(config_mad, sanity_checks)
+
+        # Twiss to ensure eveyrthing is ok
+        collider = activate_RF_and_twiss(collider, config_mad, sanity_checks)
+
+        # Clean temporary files
+        clean()
+
+        # Save collider to json
+        collider.to_json(f"collider/collider_phase_{tar_mux15:2.3f}_{tar_muy15:2.3f}.json")
+
+    # Tag end of the job
+    tree_maker_tagging(configuration, tag="completed")
+
+
+# ==================================================================================================
 # --- Script for execution
 # ==================================================================================================
 
 if __name__ == "__main__":
-    build_distr_and_collider()
+    build_phase_colliders()
+    # build_distr_and_collider()
+    build_distr_and_colliders()

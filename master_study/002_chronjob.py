@@ -243,8 +243,7 @@ class ClusterSubmission:
                 # Test if node is running, queuing or completed
                 if self._test_node(node, path_job, running_jobs, queuing_jobs):
                     print('Writing submission command for node "' + path_node + '"')
-                    # Write instruction for submission
-                    fid.write(str_body(path_node))
+                    
 
                     # if user has defined a htc_job_flavor in config.yaml otherwise default is "espresso"
                     if write_htc_job_flavour:
@@ -257,8 +256,11 @@ class ClusterSubmission:
                             )
                             htc_job_flavor = "espresso"
                         fid.write(f'+JobFlavour  = "{htc_job_flavor}"\n')
-
+                    
+                    # Write instruction for submission
+                    fid.write(str_body(path_node))
                     # Add job to list
+
                     l_path_jobs.append(path_job)
 
                     # Flag file
@@ -582,7 +584,12 @@ def submit_jobs(study_name, print_uncompleted_jobs=False):
 # Load the tree from a yaml and submit the jobs that haven't been completed yet
 if __name__ == "__main__":
     # Define study
-    study_name = "example_HL_tunescan"
+    # study_name = "example_HL_tunescan"
+    # study_name = "hl16_test_ip15_phases"
+    # study_name = "hl16_test_ip15_phases_no2"
+    # study_name = "hl16_test_ip15_phases_no3"
+    # study_name = "hl16_test_tree"
+    study_name = "hl16_phase_scan"
 
     # Submit jobs
     submit_jobs(study_name)

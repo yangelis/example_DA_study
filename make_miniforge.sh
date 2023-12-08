@@ -6,6 +6,7 @@ python -m pip install ipython numpy scipy pandas fastparquet psutil cpymad xsuit
 mkdir modules
 cd modules
 git clone https://gitlab.cern.ch/acc-models/acc-models-lhc.git -b hl16 hllhc16
+git clone https://gitlab.cern.ch/iangelis/summer_optics.git
 git clone https://github.com/xsuite/tree_maker.git
 python -m pip install -e tree_maker
 git clone https://github.com/xsuite/xmask.git

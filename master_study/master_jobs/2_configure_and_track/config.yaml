@@ -80,14 +80,6 @@ config_collider:
         dq_knob_2: ksd.b2
         c_minus_knob_1: c_minus_re_b2
         c_minus_knob_2: c_minus_im_b2
-    
-  config_ip15_phases:
-    mux:
-      lhcb1: -30.9955
-      lhcb2: -31.0411
-    muy:
-      lhcb1: -29.9689
-      lhcb2: -29.9896
 
   config_beambeam:
     bunch_spacing_buckets: 10
